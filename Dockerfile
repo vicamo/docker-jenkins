@@ -1,45 +1,41 @@
-FROM java:openjdk-7u65-jdk
+FROM java:jre
 
-RUN apt-get update && apt-get install -y wget git curl zip && rm -rf /var/lib/apt/lists/*
+MAINTAINER You-Sheng Yang <vicamo@gmail.com>
 
-ENV JENKINS_HOME /var/jenkins_home
+ENV DEBIAN_FRONTEND=noninteractive \
+    JENKINS_HOME=/var/lib/jenkins \
+    JENKINS_HTTP_PORT=8080 \
+    JENKINS_SLAVE_AGENT_PORT=50000
 
-# Jenkins is ran with user `jenkins`, uid = 1000
-# If you bind mount a volume from host/vloume from a data container, 
-# ensure you use same uid
-RUN useradd -d "$JENKINS_HOME" -u 1000 -m -s /bin/bash jenkins
+# We need Debian specific bits for better system management while
+# also latest official war package to ensure correct dependencies
+# between all the plugins. Overwrite jenkins.war directly. Update
+# with cautions!
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		jenkins \
+		runit \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*_dists_* \
+	&& (cd /usr/share/jenkins; wget http://mirrors.jenkins-ci.org/war/latest/jenkins.war -O jenkins.war) \
+	&& mkdir -p /usr/share/jenkins/plugins \
+	&& mkdir -p /var/lib/jenkins/plugins \
+	&& chown jenkins.jenkins /var/lib/jenkins/plugins
 
-# Jenkins home directoy is a volume, so configuration and build history 
+# https://github.com/docker/docker/issues/2174
+# Docker seems to map IPv6 ports only. So when connected with IPv6
+# host address, jenkins will rejest the connection because in Debian
+# it listens to 127.0.0.1 by default.
+RUN sed -e 's/^HTTP_HOST=.*/HTTP_HOST=0.0.0.0/' \
+		-e 's/^AJP_HOST=.*/AJP_HOST=0.0.0.0/' \
+		-i /etc/default/jenkins
+
+ADD jenkins.runit /etc/service/jenkins/run
+ADD init.groovy ${JENKINS_HOME}/init.groovy.d/tcp-slave-angent-port.groovy
+
+# Jenkins home directoy is a volume, so configuration and build history
 # can be persisted and survive image upgrades
-VOLUME /var/jenkins_home
+VOLUME ${JENKINS_HOME}
 
-# `/usr/share/jenkins/ref/` contains all reference configuration we want 
-# to set on a fresh new installation. Use it to bundle additional plugins 
-# or config file with your custom jenkins Docker image.
-RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
+EXPOSE ${JENKINS_HTTP_PORT} ${JENKINS_SLAVE_AGENT_PORT}
 
-
-COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-angent-port.groovy
-
-ENV JENKINS_VERSION 1.596.1
-
-# could use ADD but this one does not check Last-Modified header 
-# see https://github.com/docker/docker/issues/8331
-RUN curl -L http://mirrors.jenkins-ci.org/war-stable/1.596.1/jenkins.war -o /usr/share/jenkins/jenkins.war
-
-ENV JENKINS_UC https://updates.jenkins-ci.org
-RUN chown -R jenkins "$JENKINS_HOME" /usr/share/jenkins/ref
-
-# for main web interface:
-EXPOSE 8080
-
-# will be used by attached slave agents:
-EXPOSE 50000
-
-USER jenkins
-
-COPY jenkins.sh /usr/local/bin/jenkins.sh
-ENTRYPOINT ["/usr/local/bin/jenkins.sh"]
-
-# from a derived Dockerfile, can use `RUN plugin.sh active.txt` to setup /usr/share/jenkins/ref/plugins from a support bundle
-COPY plugins.sh /usr/local/bin/plugins.sh
+ENTRYPOINT ["/usr/sbin/runsvdir-start"]
