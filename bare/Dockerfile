@@ -11,7 +11,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # also latest official war package to ensure correct dependencies
 # between all the plugins. Overwrite jenkins.war directly. Update
 # with cautions!
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
 		jenkins \
 		runit \
 	&& apt-get clean \

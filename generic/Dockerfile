@@ -22,7 +22,7 @@ FROM vicamo/jenkins-bare
 #   translation.jpi
 #   windows-slaves.jpi
 RUN cd /usr/share/jenkins/plugins \
-	&& wget \
+	&& wget -nv \
 		http://updates.jenkins-ci.org/latest/analysis-collector.hpi \
 		http://updates.jenkins-ci.org/latest/analysis-core.hpi \
 		http://updates.jenkins-ci.org/latest/backup.hpi \
@@ -66,10 +66,14 @@ RUN cd /usr/share/jenkins/plugins \
 		http://updates.jenkins-ci.org/latest/violations.hpi \
 		http://updates.jenkins-ci.org/latest/ws-cleanup.hpi
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
 		bzr \
 		git \
-	&& wget https://storage.googleapis.com/git-repo-downloads/repo -O /usr/bin/repo \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*_dists_* \
+	&& wget -nv -O /usr/bin/repo \
+		https://storage.googleapis.com/git-repo-downloads/repo \
 	&& chmod +x /usr/bin/repo \
 	&& git config --global user.name "Jenkins Bot" \
 	&& git config --global user.email "jenkins@localdomain"
