@@ -21,7 +21,7 @@ FROM vicamo/jenkins-bare
 #   subversion.jpi
 #   translation.jpi
 #   windows-slaves.jpi
-RUN cd /usr/share/jenkins/plugins \
+RUN cd $JENKINS_ROOT/plugins \
 	&& wget -nv \
 		http://updates.jenkins-ci.org/latest/analysis-collector.hpi \
 		http://updates.jenkins-ci.org/latest/analysis-core.hpi \
