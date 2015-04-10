@@ -1,0 +1,13 @@
+#!/bin/sh
+
+[ -r /etc/default/nginx ] && . /etc/default/nginx
+
+DAEMON=/usr/sbin/nginx
+CONFFILE=/etc/nginx/nginx.conf
+
+sed -e 's/@JENKINS_PORT_8080_TCP_ADDR@/'"$JENKINS_PORT_8080_TCP_ADDR"'/' \
+    -e 's/@JENKINS_PORT_8080_TCP_PORT@/'"$JENKINS_PORT_8080_TCP_PORT"'/' \
+    -e 's/@JENKINS_HOSTNAME@/'"$JENKINS_HOSTNAME"'/' \
+    -i /etc/nginx/conf.d/default.conf
+
+exec $DAEMON -c $CONFFILE -g "daemon off;" $DAEMON_ARGS
