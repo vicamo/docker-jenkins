@@ -39,6 +39,7 @@ RUN cd $JENKINS_ROOT/plugins \
 		http://updates.jenkins-ci.org/latest/dynamicparameter.hpi \
 		http://updates.jenkins-ci.org/latest/findbugs.hpi \
 		http://updates.jenkins-ci.org/latest/gerrit.hpi \
+		http://updates.jenkins-ci.org/latest/gerrit-trigger.hpi \
 		http://updates.jenkins-ci.org/latest/git-client.hpi \
 		http://updates.jenkins-ci.org/latest/git-server.hpi \
 		http://updates.jenkins-ci.org/latest/git.hpi \
@@ -57,6 +58,7 @@ RUN cd $JENKINS_ROOT/plugins \
 		http://updates.jenkins-ci.org/latest/rebuild.hpi \
 		http://updates.jenkins-ci.org/latest/repo.hpi \
 		http://updates.jenkins-ci.org/latest/run-condition.hpi \
+		http://updates.jenkins-ci.org/latest/saferestart.hpi \
 		http://updates.jenkins-ci.org/latest/scm-api.hpi \
 		http://updates.jenkins-ci.org/latest/scriptler.hpi \
 		http://updates.jenkins-ci.org/latest/startup-trigger-plugin.hpi \
