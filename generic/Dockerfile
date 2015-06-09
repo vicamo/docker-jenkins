@@ -1,4 +1,4 @@
-FROM vicamo/jenkins-bare
+FROM vicamo/jenkins-deps-bare
 
 # Boundled plugins in version 1.607:
 #   $ docker exec vicamo/jenkins:bare ls -1 /var/lib/jenkins/plugins | grep jpi
