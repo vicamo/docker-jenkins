@@ -1,4 +1,4 @@
-FROM java:jre
+FROM vicamo/java:sid-openjdk-7-jre
 
 MAINTAINER You-Sheng Yang <vicamo@gmail.com>
 
