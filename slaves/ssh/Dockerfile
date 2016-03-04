@@ -1,4 +1,4 @@
-FROM debian
+FROM vicamo/java:jessie-openjdk-7-jre
 
 ENV JENKINS_UID=105 \
 	JENKINS_GID=108 \
