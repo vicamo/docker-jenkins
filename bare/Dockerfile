@@ -5,6 +5,7 @@ MAINTAINER You-Sheng Yang <vicamo@gmail.com>
 ENV DEBIAN_FRONTEND=noninteractive \
     JENKINS_ROOT=/usr/share/jenkins \
     JENKINS_HOME=/var/lib/jenkins \
+    JENKINS_UC=https://updates.jenkins-ci.org \
     JENKINS_PORT_8080_TCP_PORT=8080 \
     JENKINS_PORT_50000_TCP_PORT=50000
 
@@ -21,6 +22,7 @@ RUN (wget -q -O - https://jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add
 
 ADD entrypoint.sh /
 ADD init.groovy ${JENKINS_HOME}/init.groovy.d/tcp-slave-angent-port.groovy
+ADD plugins.sh /usr/local/bin/plugins.sh
 
 # Respect Docker ENV
 RUN sed -e "s!^JENKINS_ROOT=.*!JENKINS_ROOT=$JENKINS_ROOT!" \
