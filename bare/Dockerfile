@@ -1,31 +1,25 @@
-FROM vicamo/java:sid-openjdk-7-jre
+FROM java:8-jdk
 
 MAINTAINER You-Sheng Yang <vicamo@gmail.com>
 
 ENV DEBIAN_FRONTEND=noninteractive \
     JENKINS_ROOT=/usr/share/jenkins \
     JENKINS_HOME=/var/lib/jenkins \
-    JENKINS_VERSION=latest \
     JENKINS_PORT_8080_TCP_PORT=8080 \
     JENKINS_PORT_50000_TCP_PORT=50000
 
-# We need Debian specific bits for better system management while
-# also latest official war package to ensure correct dependencies
-# between all the plugins. Overwrite jenkins.war directly. Update
-# with cautions!
-RUN apt-get update \
+RUN (wget -q -O - https://jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -) \
+	&& (echo "deb http://pkg.jenkins-ci.org/debian binary/" > /etc/apt/sources.list.d/jenkins.list) \
+	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		jenkins \
-		runit \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*_dists_* \
-	&& wget -nv -O $JENKINS_ROOT/jenkins.war \
-		http://mirrors.jenkins-ci.org/war/$JENKINS_VERSION/jenkins.war \
 	&& mkdir -p $JENKINS_ROOT/plugins \
 	&& mkdir -p $JENKINS_HOME/plugins \
 	&& chown jenkins.jenkins $JENKINS_HOME/plugins
 
-ADD jenkins.runit /etc/service/jenkins/run
+ADD entrypoint.sh /
 ADD init.groovy ${JENKINS_HOME}/init.groovy.d/tcp-slave-angent-port.groovy
 
 # Respect Docker ENV
@@ -50,4 +44,4 @@ VOLUME ${JENKINS_HOME}
 
 EXPOSE ${JENKINS_PORT_8080_TCP_PORT} ${JENKINS_PORT_50000_TCP_PORT}
 
-ENTRYPOINT ["/usr/sbin/runsvdir-start"]
+ENTRYPOINT ["/entrypoint.sh"]
